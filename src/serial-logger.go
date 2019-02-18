@@ -63,14 +63,12 @@ func main () {
     }
     var dev_par_c byte = dev_par_s[0]
     if _, exists := parity_map[dev_par_c]; !exists {
-//    if !(dev_par_s=='n' || dev_par_s=='o' || dev_par_s=='e' || dev_par_s=='m' || dev_par_s=='s') {
         fmt.Println("Unknown parity. Try one of [n,o,e,m,s] ...")
         os.Exit(1)
     }
     
     // guard: stop sanity
     if _, exists := stopbits_map[dev_stp_i]; !exists {
-//    if !(devstp_i==1 || devstp_i==15 || devstp_i==2) {
         fmt.Println("Unknown number of stop bits. Try one of [1,15,2] ...")
         os.Exit(1)
     }
