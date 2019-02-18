@@ -76,15 +76,10 @@ func main () {
         var t1 time.Time = time.Now()
         
         // process line
-//        buf[bufi] = 0
         append2log(log, t0, t1, string(buf[0:bufi]))
         
         // cleanup
         bufi = 0
     }
-    s.Read(buf)
-    
-    // dummy write to appease golang
-//    append2log(log, time.Now(), time.Now(), "dummy")
 }
 
