@@ -9,7 +9,8 @@ import (
 
 const BUFSIZE = 1024
 
-var buf []byte = make([]byte, BUFSIZE)
+var buf  []byte = make([]byte, BUFSIZE)
+var bufi   int  = 0
 
 func append2log (log *os.File, t0 time.Time, t1 time.Time, line string) {
     var fullline string = fmt.Sprintf("%d.%09d,%d.%09d,%s\n", t0.Unix(), t0.Nanosecond(), t1.Unix(), t1.Nanosecond(), line)
@@ -47,9 +48,43 @@ func main () {
         fmt.Println(err)
     }
     
+    // service loop
+    for {
+        // read line
+        var t0 time.Time = time.Now()
+        for {
+            // blocking read
+            n, err := s.Read(buf[bufi:bufi+1])
+            if err != nil {
+                fmt.Println(err)
+                os.Exit(4)
+            }
+            
+            // guard: disconnect case?
+            if n==0 {
+                fmt.Println("n==0")
+                os.Exit(5)
+            }
+            
+            bufi++
+            
+            // check exit condition
+            if buf[bufi-1]=='\n' {
+                break
+            }
+        }
+        var t1 time.Time = time.Now()
+        
+        // process line
+//        buf[bufi] = 0
+        append2log(log, t0, t1, string(buf[0:bufi]))
+        
+        // cleanup
+        bufi = 0
+    }
     s.Read(buf)
     
     // dummy write to appease golang
-    append2log(log, time.Now(), time.Now(), "dummy")
+//    append2log(log, time.Now(), time.Now(), "dummy")
 }
 
