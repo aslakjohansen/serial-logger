@@ -45,16 +45,10 @@ func main () {
     }
     var dev_path  string   = os.Args[1]
     var dev_par_s string   = os.Args[2]
-    var dev_stp_i int
-    dev_stp_i, err        := strconv.Atoi(os.Args[3])
+    var dev_stp_s string   = os.Args[3]
     var log_path  string   = os.Args[4]
     
     // guard: error converting stop bit count
-    if err != nil {
-        fmt.Println("Error converting number of stopbits")
-        fmt.Println(err)
-        os.Exit(1)
-    }
     
     // guard: parity sanity
     if len(dev_par_s)!=1 {
@@ -68,6 +62,12 @@ func main () {
     }
     
     // guard: stop sanity
+    dev_stp_i, err := strconv.Atoi(dev_stp_s)
+    if err != nil {
+        fmt.Println("Error converting number of stopbits")
+        fmt.Println(err)
+        os.Exit(1)
+    }
     if _, exists := stopbits_map[dev_stp_i]; !exists {
         fmt.Println("Unknown number of stop bits. Try one of [1,15,2] ...")
         os.Exit(1)
