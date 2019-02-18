@@ -44,11 +44,11 @@ func main () {
         fmt.Printf("        %s COM1 9600 n 1 log.csv\n", os.Args[0])
         os.Exit(1)
     }
-    var dev_path   string   = os.Args[1]
-    var dev_baud_s string   = os.Args[2]
-    var dev_par_s  string   = os.Args[3]
-    var dev_stop_s string   = os.Args[4]
-    var log_path   string   = os.Args[5]
+    var dev_path   string = os.Args[1]
+    var dev_baud_s string = os.Args[2]
+    var dev_par_s  string = os.Args[3]
+    var dev_stop_s string = os.Args[4]
+    var log_path   string = os.Args[5]
     
     // guard: stop sanity
     dev_baud_i, err := strconv.Atoi(dev_baud_s)
