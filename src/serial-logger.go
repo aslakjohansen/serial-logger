@@ -4,7 +4,12 @@ import (
     "fmt"
     "os"
     "time"
+    "github.com/tarm/serial"
 )
+
+const BUFSIZE = 1024
+
+var buf []byte = make([]byte, BUFSIZE)
 
 func append2log (log *os.File, t0 time.Time, t1 time.Time, line string) {
     var fullline string = fmt.Sprintf("%d.%09d,%d.%09d,%s\n", t0.Unix(), t0.Nanosecond(), t1.Unix(), t1.Nanosecond(), line)
@@ -34,6 +39,15 @@ func main () {
         fmt.Println(err)
         os.Exit(2)
     }
+    
+    // open serial port
+    c := &serial.Config{Name: dev_path, Baud: 9600}
+    s, err := serial.OpenPort(c)
+    if err != nil {
+        fmt.Println(err)
+    }
+    
+    s.Read(buf)
     
     // dummy write to appease golang
     append2log(log, time.Now(), time.Now(), "dummy")

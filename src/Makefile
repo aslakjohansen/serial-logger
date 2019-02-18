@@ -9,5 +9,6 @@ clean:
 
 
 serial-logger: serial-logger.go
+	go get github.com/tarm/serial
 	go build serial-logger.go
 
