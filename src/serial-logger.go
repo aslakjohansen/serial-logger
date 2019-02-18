@@ -38,15 +38,24 @@ func append2log (log *os.File, t0 time.Time, t1 time.Time, line string) {
 
 func main () {
     // guard: command line args
-    if len(os.Args) != 5 {
-        fmt.Printf("Syntax: %s DEVICE PARITY STOPBITS FILENAME\n", os.Args[0])
-        fmt.Printf("        %s /dev/ttyACM0 n 1 log.csv\n", os.Args[0])
+    if len(os.Args) != 6 {
+        fmt.Printf("Syntax: %s DEVICE BAUDRATE PARITY STOPBITS FILENAME\n", os.Args[0])
+        fmt.Printf("        %s /dev/ttyACM0 9600 n 1 log.csv\n", os.Args[0])
         os.Exit(1)
     }
-    var dev_path  string   = os.Args[1]
-    var dev_par_s string   = os.Args[2]
-    var dev_stp_s string   = os.Args[3]
-    var log_path  string   = os.Args[4]
+    var dev_path   string   = os.Args[1]
+    var dev_baud_s string   = os.Args[2]
+    var dev_par_s  string   = os.Args[3]
+    var dev_stop_s string   = os.Args[4]
+    var log_path   string   = os.Args[5]
+    
+    // guard: stop sanity
+    dev_baud_i, err := strconv.Atoi(dev_baud_s)
+    if err != nil {
+        fmt.Println("Error converting baudrate number")
+        fmt.Println(err)
+        os.Exit(1)
+    }
     
     // guard: parity sanity
     if len(dev_par_s)!=1 {
@@ -60,23 +69,23 @@ func main () {
     }
     
     // guard: stop sanity
-    dev_stp_i, err := strconv.Atoi(dev_stp_s)
+    dev_stop_i, err := strconv.Atoi(dev_stop_s)
     if err != nil {
         fmt.Println("Error converting number of stopbits")
         fmt.Println(err)
         os.Exit(1)
     }
-    if _, exists := stopbits_map[dev_stp_i]; !exists {
+    if _, exists := stopbits_map[dev_stop_i]; !exists {
         fmt.Println("Unknown number of stop bits. Try one of [1,15,2] ...")
         os.Exit(1)
     }
     
     // print out configuration
-    fmt.Printf("serial-logger: %s[%s,%d] -> %s\n", dev_path, dev_par_s, dev_stp_i, log_path)
+    fmt.Printf("serial-logger: %s[%d,%s,%d] -> %s\n", dev_path, dev_baud_i, dev_par_s, dev_stop_i, log_path)
     
     // parse serial options
     var dev_par serial.Parity   = parity_map[dev_par_c]
-    var dev_stp serial.StopBits = stopbits_map[dev_stp_i]
+    var dev_stop serial.StopBits = stopbits_map[dev_stop_i]
     
     // open log file
     log, err := os.OpenFile(log_path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -86,7 +95,7 @@ func main () {
     }
     
     // open serial port
-    c := &serial.Config{Name: dev_path, Baud: 9600, Parity: dev_par, StopBits: dev_stp}
+    c := &serial.Config{Name: dev_path, Baud: dev_baud_i, Parity: dev_par, StopBits: dev_stop}
     s, err := serial.OpenPort(c)
     if err != nil {
         fmt.Println(err)
