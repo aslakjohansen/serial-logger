@@ -5,12 +5,27 @@ import (
     "os"
     "time"
     "github.com/tarm/serial"
+    "strconv"
 )
 
 const BUFSIZE = 1024
 
 var buf  []byte = make([]byte, BUFSIZE)
 var bufi   int  = 0
+
+var parity_map = map[byte] serial.Parity {
+    'n': serial.ParityNone,
+    'o': serial.ParityOdd,
+    'e': serial.ParityEven,
+    'm': serial.ParityMark,
+    's': serial.ParitySpace,
+}
+
+var stopbits_map = map[int] serial.StopBits {
+    1:  serial.Stop1,
+    15: serial.Stop1Half,
+    2:  serial.Stop2,
+}
 
 func append2log (log *os.File, t0 time.Time, t1 time.Time, line string) {
     var fullline string = fmt.Sprintf("%d.%09d,%d.%09d,%s\n", t0.Unix(), t0.Nanosecond(), t1.Unix(), t1.Nanosecond(), line)
@@ -23,16 +38,49 @@ func append2log (log *os.File, t0 time.Time, t1 time.Time, line string) {
 
 func main () {
     // guard: command line args
-    if len(os.Args) != 3 {
-        fmt.Printf("Syntax: %s DEVICE FILENAME\n", os.Args[0])
-        fmt.Printf("        %s /dev/ttyACM0 log.csv\n", os.Args[0])
+    if len(os.Args) != 5 {
+        fmt.Printf("Syntax: %s DEVICE PARITY STOPBITS FILENAME\n", os.Args[0])
+        fmt.Printf("        %s /dev/ttyACM0 n 1 log.csv\n", os.Args[0])
         os.Exit(1)
     }
-    var dev_path string = os.Args[1]
-    var log_path string = os.Args[2]
+    var dev_path  string   = os.Args[1]
+    var dev_par_s string   = os.Args[2]
+    var dev_stp_i int
+    dev_stp_i, err        := strconv.Atoi(os.Args[3])
+    var log_path  string   = os.Args[4]
+    
+    // guard: error converting stop bit count
+    if err != nil {
+        fmt.Println("Error converting number of stopbits")
+        fmt.Println(err)
+        os.Exit(1)
+    }
+    
+    // guard: parity sanity
+    if len(dev_par_s)!=1 {
+        fmt.Println("wrong parity length. Try one of [n,o,e,m,s] ...")
+        os.Exit(1)
+    }
+    var dev_par_c byte = dev_par_s[0]
+    if _, exists := parity_map[dev_par_c]; !exists {
+//    if !(dev_par_s=='n' || dev_par_s=='o' || dev_par_s=='e' || dev_par_s=='m' || dev_par_s=='s') {
+        fmt.Println("Unknown parity. Try one of [n,o,e,m,s] ...")
+        os.Exit(1)
+    }
+    
+    // guard: stop sanity
+    if _, exists := stopbits_map[dev_stp_i]; !exists {
+//    if !(devstp_i==1 || devstp_i==15 || devstp_i==2) {
+        fmt.Println("Unknown number of stop bits. Try one of [1,15,2] ...")
+        os.Exit(1)
+    }
     
     // print out configuration
-    fmt.Printf("serial-logger: %s -> %s\n", dev_path, log_path)
+    fmt.Printf("serial-logger: %s[%s,%d] -> %s\n", dev_path, dev_par_s, dev_stp_i, log_path)
+    
+    // parse serial options
+    var dev_par serial.Parity   = parity_map[dev_par_c]
+    var dev_stp serial.StopBits = stopbits_map[dev_stp_i]
     
     // open log file
     log, err := os.OpenFile(log_path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -42,10 +90,11 @@ func main () {
     }
     
     // open serial port
-    c := &serial.Config{Name: dev_path, Baud: 9600}
+    c := &serial.Config{Name: dev_path, Baud: 9600, Parity: dev_par, StopBits: dev_stp}
     s, err := serial.OpenPort(c)
     if err != nil {
         fmt.Println(err)
+        os.Exit(4)
     }
     
     // service loop
