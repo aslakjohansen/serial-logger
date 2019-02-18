@@ -60,7 +60,7 @@ func main () {
     
     // guard: parity sanity
     if len(dev_par_s)!=1 {
-        fmt.Println("wrong parity length. Try one of [n,o,e,m,s] ...")
+        fmt.Println("Wrong parity length. Try one of [n,o,e,m,s] ...")
         os.Exit(1)
     }
     var dev_par_c byte = dev_par_s[0]
