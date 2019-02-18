@@ -130,7 +130,7 @@ func main () {
         var t1 time.Time = time.Now()
         
         // process line
-        append2log(log, t0, t1, string(buf[0:bufi]))
+        append2log(log, t0, t1, string(buf[0:bufi-1]))
         
         // cleanup
         bufi = 0
