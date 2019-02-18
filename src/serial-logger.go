@@ -48,8 +48,6 @@ func main () {
     var dev_stp_s string   = os.Args[3]
     var log_path  string   = os.Args[4]
     
-    // guard: error converting stop bit count
-    
     // guard: parity sanity
     if len(dev_par_s)!=1 {
         fmt.Println("wrong parity length. Try one of [n,o,e,m,s] ...")
