@@ -1,11 +1,18 @@
 TARGETS = \
 	serial-logger \
+	serial-logger-win64.exe \
+	serial-logger-win32.exe \
 
 
 all: ${TARGETS}
 
 clean:
-	rm ${TARGETS}
+	touch ${TARGETS}
+	rm    ${TARGETS}
+
+mrproper: clean
+	touch dummy~
+	rm        *~
 
 
 serial-logger: serial-logger.go
