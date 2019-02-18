@@ -41,6 +41,7 @@ func main () {
     if len(os.Args) != 6 {
         fmt.Printf("Syntax: %s DEVICE BAUDRATE PARITY STOPBITS FILENAME\n", os.Args[0])
         fmt.Printf("        %s /dev/ttyACM0 9600 n 1 log.csv\n", os.Args[0])
+        fmt.Printf("        %s COM1 9600 n 1 log.csv\n", os.Args[0])
         os.Exit(1)
     }
     var dev_path   string   = os.Args[1]
